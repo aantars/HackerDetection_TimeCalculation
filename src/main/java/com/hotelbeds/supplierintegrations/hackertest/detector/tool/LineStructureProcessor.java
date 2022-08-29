@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
 public interface LineStructureProcessor {
 
     Optional<FailureAttempt> validateLineAndReturnAsObject(String anyString);
