@@ -12,10 +12,12 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class LineStructureProcessorImpl implements LineStructureProcessor{
-
+    public LineStructureProcessorImpl() {
+    }
 
     @Override
     public Optional<FailureAttempt> validateLineAndReturnAsObject(String givenLine) {
@@ -33,7 +35,9 @@ public class LineStructureProcessorImpl implements LineStructureProcessor{
     }
 
     private Optional<FailureAttempt> parseLineToFailureAttemptInstance(String givenLine){
-        ArrayList<String> splittedLine = (ArrayList<String>) Arrays.asList(givenLine.split(","));
+        String temporalSplittedList[]  = givenLine.split(",");
+        ArrayList<String> splittedLine =
+                Arrays.stream(temporalSplittedList).sequential().collect(Collectors.toCollection(ArrayList::new));
 
         if(splittedLine.size()!=4){
             throw new WrongLogLineFormatException("Wrong log line format");
@@ -44,7 +48,7 @@ public class LineStructureProcessorImpl implements LineStructureProcessor{
         }
 
         FailureAttempt failureAttempt =
-                new FailureAttempt(splittedLine.get(0), getReadableTimeStamp(splittedLine.get(1)), splittedLine.get(3));
+                new FailureAttempt(splittedLine.get(0), getReadableTimeStamp(splittedLine.get(1)), splittedLine.get(3),1);
 
         return Optional.of(failureAttempt);
     }

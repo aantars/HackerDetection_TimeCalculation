@@ -7,14 +7,16 @@ public class FailureAttempt {
     private String ipAddress;
     private LocalDateTime triggeredTimeStamp;
     private String userName;
+    private int attemptsAmount;
 
     public FailureAttempt() {
     }
 
-    public FailureAttempt(String ipAddress, LocalDateTime triggeredTimeStamp, String userName) {
+    public FailureAttempt(String ipAddress, LocalDateTime triggeredTimeStamp, String userName, int attemptsAmount) {
         this.ipAddress = ipAddress;
         this.triggeredTimeStamp = triggeredTimeStamp;
         this.userName = userName;
+        this.attemptsAmount = attemptsAmount;
     }
 
     public String getIpAddress() {
@@ -39,5 +41,13 @@ public class FailureAttempt {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public int getAttemptsAmount() {
+        return attemptsAmount;
+    }
+
+    public void setAttemptsAmount(int attemptsAmount) {
+        this.attemptsAmount = attemptsAmount;
     }
 }
