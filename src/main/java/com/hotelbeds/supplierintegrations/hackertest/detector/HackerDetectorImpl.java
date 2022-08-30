@@ -30,9 +30,8 @@ public class HackerDetectorImpl implements HackerDetector{
 
         Optional<FailureAttempt> failureAttempt = lineStructureProcessor.validateLineAndReturnAsObject(line);
 
-        if(failureAttempt.isPresent()){
-            // TODO: check if is an attack
-            return "Possible Attack";
+        if(failureAttempt.isPresent() && attemptsManager.isAttackCandidate(failureAttempt.get())){
+            return failureAttempt.get().getIpAddress();
          }
 
         return null;

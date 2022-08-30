@@ -7,6 +7,6 @@ import java.util.Optional;
 public interface AttemptsManager {
 
     void init();
-    int checkPreviousAttempsByIP(String internetAddress);
-    Optional<FailureAttempt> saveFailureAttempt(String internetAddress, FailureAttempt failureAttempt);
+    boolean isAttackCandidate(FailureAttempt failureAttempt);
+    boolean removeDeprecatedAttempts();
 }

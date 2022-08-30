@@ -56,7 +56,7 @@ public class LineStructureProcessorImpl implements LineStructureProcessor{
     private LocalDateTime getReadableTimeStamp(String epochTime){
         try {
             long epochLongFormat = Long.parseLong(epochTime);
-            return Instant.ofEpochMilli(epochLongFormat).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            return Instant.ofEpochSecond(epochLongFormat).atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
         catch (NumberFormatException e){
             throw new TimeStampWrongFormatException("Timestamp format is wrong");
