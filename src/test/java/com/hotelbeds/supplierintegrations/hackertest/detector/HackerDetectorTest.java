@@ -1,22 +1,16 @@
 package com.hotelbeds.supplierintegrations.hackertest.detector;
 
-import com.hotelbeds.supplierintegrations.hackertest.detector.exception.TimeStampWrongFormatException;
+import com.hotelbeds.supplierintegrations.hackertest.detector.exception.NullLogLineException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class HackerDetectorTest {
@@ -73,7 +67,12 @@ public class HackerDetectorTest {
         String result = hackerDetector.parseLine(dummyLogLineFailureLogin);
 
         assertNotNull(result);
-        assertEquals(result,"80.238.9.179");
+        assertEquals("80.238.9.179",result);
+    }
+
+    @Test
+    public void nullLogLineExceptionTest(){
+        assertThrows(NullLogLineException.class, () -> hackerDetector.parseLine(null));
     }
 
     private String getCurrentTimeInEpochTime() {

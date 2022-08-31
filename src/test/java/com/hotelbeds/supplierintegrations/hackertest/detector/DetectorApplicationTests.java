@@ -10,4 +10,9 @@ class DetectorApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	public void mainAppClassTest(){
+		DetectorApplication.main(new String[]{});
+	}
+
 }

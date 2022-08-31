@@ -1,10 +1,9 @@
 package com.hotelbeds.supplierintegrations.hackertest.detector.tool;
 
-import com.hotelbeds.supplierintegrations.hackertest.detector.exception.UnableToSaveFailureException;
+import com.hotelbeds.supplierintegrations.hackertest.detector.exception.UnableToSaveFailureAttemptException;
 import com.hotelbeds.supplierintegrations.hackertest.detector.exception.UpdateListException;
 import com.hotelbeds.supplierintegrations.hackertest.detector.model.FailureAttempt;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +14,7 @@ public class AttemptsManagerImpl implements AttemptsManager{
 
     private static Map<String, FailureAttempt> failedIPLoggingAttemptsList = new ConcurrentHashMap<>();
     private static int deadLineTimeInMinutes = 5;
+    private static int attemptsToConsiderIsAnAttack= 5;
 
     @Override
     public void init() {
@@ -23,22 +23,14 @@ public class AttemptsManagerImpl implements AttemptsManager{
 
     @Override
     public boolean isAttackCandidate(FailureAttempt failureAttempt) {
+
         removeDeprecatedAttempts();
 
-        if(getPreviousAttempts(failureAttempt) >= 5){
-            deleteAttackCandidateFromList(failureAttempt);
+        if(getPreviousAttempts(failureAttempt) >= attemptsToConsiderIsAnAttack){
+            deleteFailureAttemptFromList_IsAttackCandidate(failureAttempt);
             return true;
         }
         return false;
-    }
-
-    private synchronized void deleteAttackCandidateFromList(FailureAttempt failureAttempt) {
-        try{
-            failedIPLoggingAttemptsList.remove(failureAttempt.getIpAddress());
-        }
-        catch (Exception e){
-            throw new UpdateListException("Unable to delete the attack candidate Failure attempts from list");
-        }
     }
 
     @Override
@@ -56,9 +48,17 @@ public class AttemptsManagerImpl implements AttemptsManager{
         }
     }
 
+    private synchronized void deleteFailureAttemptFromList_IsAttackCandidate(FailureAttempt failureAttempt) {
+        try{
+            failedIPLoggingAttemptsList.remove(failureAttempt.getIpAddress());
+        }
+        catch (Exception e){
+            throw new UpdateListException("Unable to delete the attack candidate Failure attempts from list");
+        }
+    }
+
     private LocalDateTime getCurrentAttemptsDeadLineTime() {
-        LocalDateTime deadLineTime = LocalDateTime.now().minusMinutes(deadLineTimeInMinutes);
-        return deadLineTime;
+        return LocalDateTime.now().minusMinutes(deadLineTimeInMinutes);
     }
 
     private int getPreviousAttempts(FailureAttempt failureAttempt) {
@@ -67,9 +67,9 @@ public class AttemptsManagerImpl implements AttemptsManager{
             Optional<FailureAttempt> savedFailureAttempt = saveFailureAttempt(failureAttempt);
             return savedFailureAttempt.get().getAttemptsAmount();
         }
-        else{
-            existingFailureAttempt = updateAttemptsAmount(existingFailureAttempt).get();
-        }
+
+        existingFailureAttempt = updateAttemptsAmount(existingFailureAttempt).get();
+
         return existingFailureAttempt.getAttemptsAmount();
     }
 
@@ -80,10 +80,10 @@ public class AttemptsManagerImpl implements AttemptsManager{
 
     private Optional<FailureAttempt> saveFailureAttempt(FailureAttempt failureAttempt) {
         try{
-            this.failedIPLoggingAttemptsList.put(failureAttempt.getIpAddress(),failureAttempt);
+            failedIPLoggingAttemptsList.put(failureAttempt.getIpAddress(),failureAttempt);
             return Optional.of(failureAttempt);
         } catch (Exception e){
-            throw new UnableToSaveFailureException("Unable to store the FailureAttempt");
+            throw new UnableToSaveFailureAttemptException("Unable to store the FailureAttempt");
         }
     }
 }

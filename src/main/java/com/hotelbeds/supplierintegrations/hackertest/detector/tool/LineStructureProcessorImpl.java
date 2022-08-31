@@ -16,28 +16,31 @@ import java.util.stream.Collectors;
 
 @Component
 public class LineStructureProcessorImpl implements LineStructureProcessor{
+
+    private static int defaultAttemptsAmount = 1;
+    public enum SigninStatus{
+        SIGNIN_FAILURE
+    }
+
     public LineStructureProcessorImpl() {
     }
 
     @Override
-    public Optional<FailureAttempt> validateLineAndReturnAsObject(String givenLine) {
-        Optional<FailureAttempt> failureAttempt = Optional.empty();
-        if(isEmptyLine(givenLine)){
+    public Optional<FailureAttempt> validateLineAndReturnAsObject(String givenLogLine) {
+
+        if(isEmptyLine(givenLogLine)){
             throw new EmptyLogLineException("Log line is empty");
         }
 
-        return parseLineToFailureAttemptInstance(givenLine);
-
+        return parseLineToFailureAttemptInstance(givenLogLine);
     }
 
     private Boolean isEmptyLine(String givenLine){
         return givenLine.equalsIgnoreCase("");
     }
 
-    private Optional<FailureAttempt> parseLineToFailureAttemptInstance(String givenLine){
-        String temporalSplittedList[]  = givenLine.split(",");
-        ArrayList<String> splittedLine =
-                Arrays.stream(temporalSplittedList).sequential().collect(Collectors.toCollection(ArrayList::new));
+    private Optional<FailureAttempt> parseLineToFailureAttemptInstance(String givenLogLine){
+        ArrayList<String> splittedLine = getSpplittedLogLine(givenLogLine);
 
         if(splittedLine.size()!=4){
             throw new WrongLogLineFormatException("Wrong log line format");
@@ -48,12 +51,19 @@ public class LineStructureProcessorImpl implements LineStructureProcessor{
         }
 
         FailureAttempt failureAttempt =
-                new FailureAttempt(splittedLine.get(0), getReadableTimeStamp(splittedLine.get(1)), splittedLine.get(3),1);
+                new FailureAttempt(splittedLine.get(0), parseEpochToLocalDateTime(splittedLine.get(1)), splittedLine.get(3),defaultAttemptsAmount);
 
         return Optional.of(failureAttempt);
     }
 
-    private LocalDateTime getReadableTimeStamp(String epochTime){
+    private ArrayList<String> getSpplittedLogLine(String givenLogLine) {
+
+        String temporalSplittedList[]  = givenLogLine.split(",");
+
+        return Arrays.stream(temporalSplittedList).sequential().collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private LocalDateTime parseEpochToLocalDateTime(String epochTime){
         try {
             long epochLongFormat = Long.parseLong(epochTime);
             return Instant.ofEpochSecond(epochLongFormat).atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -64,7 +74,7 @@ public class LineStructureProcessorImpl implements LineStructureProcessor{
     }
 
     private Boolean isSigninFailure(String signinCode){
-        return signinCode.equalsIgnoreCase("SIGNIN_FAILURE")? true : false;
+        return SigninStatus.SIGNIN_FAILURE.name().equals(signinCode);
     }
 
 }
